@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">Chron</string>
+
+    <string name="logout">Logout</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
     <string name="input1_hint">Name</string>
     <string name="input2_hint">Phone</string>
     <string name="input3_hint">Date</string>
@@ -13,6 +19,14 @@
     <string name="edit_title">Edit Information</string>
     <string name="remove_title">Remove Person?</string>
     <string name="ok_text">Yes</string>
+
+    <string name="nav_add">Add People</string>
+    <string name="nav_view">View Birthdays</string>
+    <string name="nav_logout">Logout</string>
+
+    <string name="dialog_cancel">Cancel</string>
+    <string name="logout_prompt">"Are you sure you want to logout?"</string>
+
     <string name="channel_name">Chron Notifications</string>
     <string name="channel_description">Birthday Notifications from Chron</string>
 </resources>
