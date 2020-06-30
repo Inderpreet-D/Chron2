@@ -24,9 +24,13 @@
     <string name="nav_view">View Birthdays</string>
     <string name="nav_logout">Logout</string>
 
+    <string name="view_header">Birthdays</string>
+
     <string name="dialog_cancel">Cancel</string>
-    <string name="logout_prompt">"Are you sure you want to logout?"</string>
+    <string name="logout_prompt">Are you sure you want to logout?</string>
 
     <string name="channel_name">Chron Notifications</string>
     <string name="channel_description">Birthday Notifications from Chron</string>
+
+    <string name="filler_text">FILLER TEXT; SHOULD NOT BE HERE</string>
 </resources>
