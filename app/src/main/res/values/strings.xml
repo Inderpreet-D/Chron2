@@ -6,13 +6,16 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="input1_hint">Name</string>
-    <string name="input2_hint">Phone</string>
-    <string name="input3_hint">Date</string>
-    <string name="add_text">Add</string>
-    <string name="choose_text">Choose</string>
+    <string name="name_hint">Name</string>
+    <string name="phone_hint">Phone</string>
+    <string name="date_hint">Date</string>
+
+    <string name="add_button">Add Person</string>
+    <string name="choose_button">Choose Contact</string>
+
     <string name="name_digits">abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
     <string name="phone_digits">0123456789</string>
+
     <string name="send_text">Send</string>
     <string name="edit_text">Save</string>
     <string name="cancel_text">Cancel</string>
@@ -25,6 +28,7 @@
     <string name="nav_logout">Logout</string>
 
     <string name="view_header">Birthdays</string>
+    <string name="add_header">Add Person</string>
 
     <string name="dialog_cancel">Cancel</string>
     <string name="logout_prompt">Are you sure you want to logout?</string>
@@ -33,4 +37,5 @@
     <string name="channel_description">Birthday Notifications from Chron</string>
 
     <string name="filler_text">FILLER TEXT; SHOULD NOT BE HERE</string>
+    <string name="filler_date">Abcdefghi 99</string>
 </resources>

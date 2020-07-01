@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.dragynslayr.chron.R
 import com.dragynslayr.chron.helper.log
+import kotlinx.android.synthetic.main.fragment_add.view.*
 
 class AddFragment : Fragment() {
 
@@ -16,7 +17,17 @@ class AddFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val v = inflater.inflate(R.layout.fragment_add, container, false)
-        "Add fragment".log()
+
+        setupUI(v)
+
         return v
+    }
+
+    private fun setupUI(v: View) {
+        with(v) {
+            add_button.setOnClickListener { "Clicked add".log() }
+            choose_button.setOnClickListener { "Clicked choose".log() }
+            date_layout.editText!!.setOnClickListener { "Clicked on date".log() }
+        }
     }
 }
