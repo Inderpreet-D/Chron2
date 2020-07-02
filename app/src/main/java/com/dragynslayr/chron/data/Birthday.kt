@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.dragynslayr.chron.R
-import com.dragynslayr.chron.helper.log
+import com.dragynslayr.chron.helper.getDateString
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.Exclude
@@ -18,21 +18,32 @@ import java.io.Serializable
 data class Birthday(
     var name: String? = "",
     var phone: String? = "",
-    var date: String? = "",
+    var month: Int? = -1,
+    var day: Int? = -1,
+    var message: String? = "Happy Birthday, $name!",
     var id: String? = ""
 ) : Serializable {
     @Exclude
     fun upload(database: DatabaseReference) {
         val user = Firebase.auth.currentUser!!.uid
-        "Trying to upload $this to $user".log()
         val ref = database.child(user).push()
         id = ref.key
         ref.setValue(this)
     }
+
+    @Exclude
+    fun formatMessage(newMessage: String) {
+        message = newMessage.replace("NAME", name!!)
+    }
+
+    @Exclude
+    fun getMessageFormat(): String {
+        return message!!.replace(name!!, "NAME")
+    }
 }
 
 class BirthdayListAdapter(
-    val birthdays: List<Birthday>
+    private val birthdays: List<Birthday>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     lateinit var clickListener: (Int) -> Unit
@@ -60,7 +71,7 @@ private class BirthdayHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     fun bind(birthday: Birthday) {
         with(itemView) {
             birthday_name.text = birthday.name
-            birthday_date.text = birthday.date
+            birthday_date.text = getDateString(birthday.month!!, birthday.day!!)
         }
     }
 }

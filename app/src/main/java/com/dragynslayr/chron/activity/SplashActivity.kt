@@ -1,9 +1,14 @@
 package com.dragynslayr.chron.activity
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.dragynslayr.chron.R
+import com.dragynslayr.chron.helper.CHANNEL_ID
 import com.dragynslayr.chron.helper.enableNightMode
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.ktx.auth
@@ -14,6 +19,8 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableNightMode()
+
+        createNotificationChannel()
 
         if (Firebase.auth.currentUser == null) {
             showLogin()
@@ -46,6 +53,20 @@ class SplashActivity : AppCompatActivity() {
         }
         startActivity(intent)
         finish()
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = getString(R.string.channel_name)
+            val descriptionText = getString(R.string.channel_description)
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 
     companion object {

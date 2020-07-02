@@ -4,12 +4,31 @@ import android.content.Context
 import android.content.DialogInterface
 import android.util.Log
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import com.google.android.material.textfield.TextInputLayout
 
 fun String.log() {
     Log.d(APP_TAG, this)
+}
+
+fun TextInputLayout.getText(): String {
+    return this.editText!!.text.toString()
+}
+
+fun TextInputLayout.setText(msg: String) {
+    this.editText!!.setText(msg, TextView.BufferType.EDITABLE)
+}
+
+fun TextInputLayout.resetText() {
+    this.setText("")
+}
+
+fun TextInputLayout.resetError() {
+    this.error = ""
 }
 
 private fun makeToast(context: Context, text: String, duration: Int) {
@@ -22,6 +41,14 @@ fun AppCompatActivity.toastShort(text: String) {
 
 fun AppCompatActivity.toastLong(text: String) {
     makeToast(this, text, Toast.LENGTH_LONG)
+}
+
+fun Fragment.toastShort(text: String) {
+    makeToast(requireContext(), text, Toast.LENGTH_SHORT)
+}
+
+fun Fragment.toastLong(text: String) {
+    makeToast(requireContext(), text, Toast.LENGTH_LONG)
 }
 
 fun AlertDialog.spaceButtons() {
