@@ -1,12 +1,12 @@
 package com.dragynslayr.chron.helper
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.util.Log
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputLayout

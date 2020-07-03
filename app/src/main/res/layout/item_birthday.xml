@@ -8,27 +8,37 @@
     android:background="@drawable/button"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/birthday_name"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/text_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:text="@string/filler_text"
-        android:textColor="@color/text_fg"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/birthday_date"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/birthday_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="end"
-        android:padding="8dp"
-        android:text="@string/filler_date"
-        android:textColor="@color/text_fg"
-        app:layout_constraintLeft_toRightOf="@id/birthday_name"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/birthday_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:layout_weight="1"
+            android:padding="8dp"
+            android:text="@string/filler_text"
+            android:textColor="@color/text_fg" />
+
+        <TextView
+            android:id="@+id/birthday_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="10dp"
+            android:gravity="end"
+            android:padding="8dp"
+            android:text="@string/filler_date"
+            android:textColor="@color/text_fg"
+            app:layout_constraintLeft_toRightOf="@id/birthday_name"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

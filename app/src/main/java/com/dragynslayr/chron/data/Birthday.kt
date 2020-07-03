@@ -26,19 +26,28 @@ data class Birthday(
     @Exclude
     fun upload(database: DatabaseReference) {
         val user = Firebase.auth.currentUser!!.uid
-        val ref = database.child(user).push()
-        id = ref.key
-        ref.setValue(this)
+        if (id!!.isEmpty()) {
+            val ref = database.child(user).push()
+            id = ref.key
+            ref.setValue(this)
+        } else {
+            database.child(user).child(id!!).setValue(this)
+        }
     }
 
     @Exclude
-    fun formatMessage(newMessage: String) {
-        message = newMessage.replace("NAME", name!!)
+    fun delete(database: DatabaseReference) {
+        val user = Firebase.auth.currentUser!!.uid
+        database.child(user).child(id!!).removeValue()
     }
 
     @Exclude
-    fun getMessageFormat(): String {
-        return message!!.replace(name!!, "NAME")
+    fun sameAs(other: Birthday): Boolean {
+        val nameSame = other.name == name
+        val phoneSame = other.phone == phone
+        val dateSame = other.month == month && other.day == day
+        val messageSame = other.message == message
+        return nameSame && phoneSame && dateSame && messageSame
     }
 }
 
@@ -46,8 +55,9 @@ class BirthdayListAdapter(
     private val birthdays: List<Birthday>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    lateinit var clickListener: (Int) -> Unit
-    lateinit var longClickListener: (Int) -> Boolean
+    lateinit var database: DatabaseReference
+    lateinit var clickListener: (Birthday) -> Unit
+    lateinit var longClickListener: (Birthday) -> Boolean
 
     override fun getItemCount(): Int {
         return birthdays.size
@@ -61,9 +71,10 @@ class BirthdayListAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val bh = holder as BirthdayHolder
-        bh.bind(birthdays[position])
-        bh.itemView.setOnClickListener { clickListener(position) }
-        bh.itemView.setOnLongClickListener { longClickListener(position) }
+        val birthday = birthdays[position]
+        bh.bind(birthday)
+        bh.itemView.setOnClickListener { clickListener(birthday) }
+        bh.itemView.setOnLongClickListener { longClickListener(birthday) }
     }
 }
 
