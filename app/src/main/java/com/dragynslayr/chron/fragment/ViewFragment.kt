@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dragynslayr.chron.R
 import com.dragynslayr.chron.data.Birthday
+import com.dragynslayr.chron.data.BirthdayComparator
 import com.dragynslayr.chron.data.BirthdayListAdapter
 import com.dragynslayr.chron.helper.*
 import com.google.firebase.auth.ktx.auth
@@ -29,6 +30,7 @@ class ViewFragment : Fragment() {
     private lateinit var database: DatabaseReference
     private lateinit var birthdays: ArrayList<Birthday>
     private lateinit var adapter: BirthdayListAdapter
+    private val comparator = BirthdayComparator()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -122,13 +124,38 @@ class ViewFragment : Fragment() {
                 adapter.notifyItemRangeRemoved(0, size)
 
                 if (snapshot.exists()) {
+                    val temp = arrayListOf<Birthday>()
                     snapshot.children.forEach {
-                        birthdays.add(it.getValue<Birthday>()!!)
+                        temp.add(it.getValue<Birthday>()!!)
                     }
+
+                    val lists = splitListByDate(temp.sortedWith(comparator))
+                    birthdays.addAll(lists.first)
+                    birthdays.addAll(lists.second)
+
                     adapter.notifyItemRangeInserted(0, birthdays.size)
-                    recycler.scrollToPosition(birthdays.size - 1)
+                    recycler.scrollToPosition(0)
                 }
             }
         })
+    }
+
+    private fun splitListByDate(list: List<Birthday>): Pair<List<Birthday>, List<Birthday>> {
+        val currentDate = getCurrentDate()
+        val currentDay = currentDate.day
+        val currentMonth = currentDate.month
+
+        var idx = 0
+        for (i in 0..list.size) {
+            val bd = list[i]
+            if (bd.month!! >= currentMonth && bd.day!! >= currentDay) {
+                idx = i
+                break
+            }
+        }
+
+        val first = list.subList(idx, list.size)
+        val second = list.subList(0, idx)
+        return Pair(first, second)
     }
 }

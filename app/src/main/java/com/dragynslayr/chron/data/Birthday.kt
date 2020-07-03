@@ -43,11 +43,24 @@ data class Birthday(
 
     @Exclude
     fun sameAs(other: Birthday): Boolean {
-        val nameSame = other.name == name
-        val phoneSame = other.phone == phone
-        val dateSame = other.month == month && other.day == day
-        val messageSame = other.message == message
+        val nameSame = name == other.name
+        val phoneSame = phone == other.phone
+        val dateSame = month == other.month && day == other.day
+        val messageSame = message == other.message
         return nameSame && phoneSame && dateSame && messageSame
+    }
+
+    @Exclude
+    fun compare(other: Birthday): Int {
+        return if (month == other.month) {
+            if (day == other.day) {
+                phone!!.compareTo(other.phone!!)
+            } else {
+                day!! - other.day!!
+            }
+        } else {
+            month!! - other.month!!
+        }
     }
 }
 
@@ -84,5 +97,11 @@ private class BirthdayHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
             birthday_name.text = birthday.name
             birthday_date.text = getDateString(birthday.month!!, birthday.day!!)
         }
+    }
+}
+
+class BirthdayComparator : Comparator<Birthday> {
+    override fun compare(o1: Birthday?, o2: Birthday?): Int {
+        return o1!!.compare(o2!!)
     }
 }
