@@ -1,6 +1,9 @@
 package com.dragynslayr.chron.activity
 
+import android.app.AlarmManager
 import android.app.AlertDialog
+import android.app.PendingIntent
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.Configuration
@@ -30,6 +33,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -71,6 +75,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         userId = Firebase.auth.currentUser!!.uid
         startListener()
+
+        scheduleAlarm()
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -155,5 +161,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 }
             }
         })
+    }
+
+    private fun scheduleAlarm() {
+        val c = Calendar.getInstance()
+        c.time = Date()
+
+        val manager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, AlarmReceiver::class.java)
+        val pending = PendingIntent.getBroadcast(this, 0, intent, 0)
+
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, c.timeInMillis, 60000, pending)
+
+        "Alarm scheduled".log()
     }
 }

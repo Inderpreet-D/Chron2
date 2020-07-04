@@ -33,7 +33,7 @@ class SplashActivity : AppCompatActivity() {
         val providers = arrayListOf(AuthUI.IdpConfig.EmailBuilder().build())
         val loginIntent =
             AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers)
-                .setLogo(R.drawable.ic_launcher_foreground).setTheme(R.style.Theme_MyApp)
+                .setLogo(R.drawable.ic_chron).setTheme(R.style.Theme_MyApp)
                 .build()
 
         startActivityForResult(loginIntent, RC_SIGN_IN)
