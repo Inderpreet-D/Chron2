@@ -3,14 +3,16 @@ package com.dragynslayr.chron.activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.telephony.SmsManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.os.postDelayed
 import com.dragynslayr.chron.R
 import com.dragynslayr.chron.data.Birthday
 import com.dragynslayr.chron.helper.CHANNEL_ID
 import com.dragynslayr.chron.helper.getCurrentDate
 import com.dragynslayr.chron.helper.getDateString
-import com.dragynslayr.chron.helper.log
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
@@ -100,7 +102,12 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     private fun sendMessages(birthdays: ArrayList<Birthday>) {
-        "Can't send messages yet".log()
+        val sms = SmsManager.getDefault()
+        birthdays.forEachIndexed { i, birthday ->
+            Handler().postDelayed(i * 500L) {
+                sms.sendTextMessage(birthday.phone!!, null, birthday.message!!, null, null)
+            }
+        }
     }
 
     companion object {

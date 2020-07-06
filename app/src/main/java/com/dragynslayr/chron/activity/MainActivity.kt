@@ -1,16 +1,19 @@
 package com.dragynslayr.chron.activity
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
@@ -21,27 +24,18 @@ import com.dragynslayr.chron.R
 import com.dragynslayr.chron.fragment.AddFragment
 import com.dragynslayr.chron.fragment.ViewFragment
 import com.dragynslayr.chron.helper.enableNightMode
-import com.dragynslayr.chron.helper.log
 import com.dragynslayr.chron.helper.spaceButtons
 import com.dragynslayr.chron.helper.toastLong
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
-
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var drawer: DrawerLayout
     private lateinit var toggle: ActionBarDrawerToggle
-    private lateinit var database: DatabaseReference
-    private lateinit var userId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,19 +58,43 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         nav_view.setNavigationItemSelectedListener(this)
 
-        database = Firebase.database.reference
-
         if (savedInstanceState == null) {
             supportFragmentManager.commit {
                 add<ViewFragment>(R.id.content_frame, null, intent.extras)
             }
         }
 
-
-        userId = Firebase.auth.currentUser!!.uid
-        startListener()
-
+        checkSMSPermission()
         scheduleAlarm()
+    }
+
+    private fun checkSMSPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.SEND_SMS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.SEND_SMS),
+                SEND_SMS_PERMISSION
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode != SEND_SMS_PERMISSION) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        } else if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+            AlertDialog.Builder(this).setCancelable(false).setTitle("SMS Permission not granted")
+                .setMessage("This app will not be able to automatically text people without this permission")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.ok, null).show()
+        }
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -147,32 +165,27 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         finish()
     }
 
-    private fun startListener() {
-        database.child(userId).addValueEventListener(object : ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {}
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    snapshot.children.forEach {
-                        "Person $it".log()
-                    }
-                } else {
-                    "No data".log()
-                }
-            }
-        })
-    }
-
     private fun scheduleAlarm() {
         val c = Calendar.getInstance()
         c.time = Date()
+        c.set(Calendar.HOUR_OF_DAY, 0)
+        c.set(Calendar.MINUTE, 1)
+        c.set(Calendar.SECOND, 0)
+        c.set(Calendar.MILLISECOND, 0)
 
         val manager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, AlarmReceiver::class.java)
-        val pending = PendingIntent.getBroadcast(this, 0, intent, 0)
+        val alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
 
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, c.timeInMillis, 60000, pending)
+        manager.setRepeating(
+            AlarmManager.RTC_WAKEUP,
+            c.timeInMillis,
+            AlarmManager.INTERVAL_DAY,
+            alarmIntent
+        )
+    }
 
-        "Alarm scheduled".log()
+    companion object {
+        private const val SEND_SMS_PERMISSION = 1
     }
 }
