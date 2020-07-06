@@ -103,9 +103,14 @@ class AlarmReceiver : BroadcastReceiver() {
 
     private fun sendMessages(birthdays: ArrayList<Birthday>) {
         val sms = SmsManager.getDefault()
+        val currentYear = calendar.get(Calendar.YEAR)
         birthdays.forEachIndexed { i, birthday ->
-            Handler().postDelayed(i * 500L) {
-                sms.sendTextMessage(birthday.phone!!, null, birthday.message!!, null, null)
+            if (birthday.lastSentYear!! < currentYear) {
+                Handler().postDelayed(i * 500L) {
+                    sms.sendTextMessage(birthday.phone!!, null, birthday.message!!, null, null)
+                    birthday.lastSentYear = currentYear
+                    birthday.upload(database)
+                }
             }
         }
     }
