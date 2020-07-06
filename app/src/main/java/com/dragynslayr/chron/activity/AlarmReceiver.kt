@@ -36,9 +36,9 @@ class AlarmReceiver : BroadcastReceiver() {
         calendar = Calendar.getInstance()
         calendar.time = Date()
 
-        //        if (calendar.get(Calendar.HOUR_OF_DAY) != 0) {
-//            return
-//        }
+        if (calendar.get(Calendar.HOUR_OF_DAY) != 0) {
+            return
+        }
 
         context = c!!
 
