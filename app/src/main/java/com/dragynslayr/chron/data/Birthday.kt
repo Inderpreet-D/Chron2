@@ -21,8 +21,8 @@ data class Birthday(
     var month: Int? = -1,
     var day: Int? = -1,
     var message: String? = "Happy Birthday, $name!",
-    var lastSentYear: Int? = 0,
-    var id: String? = ""
+    var id: String? = "",
+    var lastSentYear: Int? = 0
 ) : Serializable {
     @Exclude
     fun upload(database: DatabaseReference) {
