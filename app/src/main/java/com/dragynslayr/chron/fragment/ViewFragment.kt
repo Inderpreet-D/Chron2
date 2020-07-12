@@ -146,11 +146,11 @@ class ViewFragment : Fragment() {
         val currentMonth = currentDate.month
 
         var idx = 0
-        for (i in 0..list.size) {
-            val bd = list[i]
-            if (bd.month!! >= currentMonth && bd.day!! >= currentDay) {
+        var found = false
+        list.forEachIndexed { i, bd ->
+            if (!found && bd.month!! >= currentMonth && bd.day!! >= currentDay) {
                 idx = i
-                break
+                found = true
             }
         }
 
