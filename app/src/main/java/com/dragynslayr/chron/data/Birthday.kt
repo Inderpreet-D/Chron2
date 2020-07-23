@@ -5,12 +5,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.dragynslayr.chron.R
+import com.dragynslayr.chron.helper.DB_BIRTHDAYS
 import com.dragynslayr.chron.helper.getDateString
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.Exclude
 import com.google.firebase.database.IgnoreExtraProperties
-import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.item_birthday.view.*
 import java.io.Serializable
 
@@ -25,21 +24,24 @@ data class Birthday(
     var lastSentYear: Int? = 0
 ) : Serializable {
     @Exclude
-    fun upload(database: DatabaseReference) {
-        val user = Firebase.auth.currentUser!!.uid
+    fun upload(database: DatabaseReference, user: String) {
         if (id!!.isEmpty()) {
-            val ref = database.child(user).push()
+            val ref = database.child(DB_BIRTHDAYS).child(user).push()
             id = ref.key
             ref.setValue(this)
         } else {
-            database.child(user).child(id!!).setValue(this)
+            database.child(DB_BIRTHDAYS).child(user).child(id!!).setValue(this)
         }
     }
 
     @Exclude
-    fun delete(database: DatabaseReference) {
-        val user = Firebase.auth.currentUser!!.uid
-        database.child(user).child(id!!).removeValue()
+    fun upload(database: DatabaseReference, user: User) {
+        upload(database, user.username!!)
+    }
+
+    @Exclude
+    fun delete(database: DatabaseReference, user: User) {
+        database.child(DB_BIRTHDAYS).child(user.username!!).child(id!!).removeValue()
     }
 
     @Exclude

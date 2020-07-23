@@ -1,5 +1,15 @@
 <resources>
-    <string name="app_name">Chron Birthday Texter</string>
+    <string name="app_name">Chron</string>
+
+    <string name="username_hint">Username</string>
+    <string name="password_hint">Password</string>
+    <string name="login_button">Login</string>
+    <string name="register_button">Register</string>
+    <string name="login_prompt">Have an account? Click here to login</string>
+    <string name="register_prompt">Don\'t have an account? Click here to register</string>
+    <string name="required_field">Required</string>
+    <string name="failed_login">Invalid Username or Password</string>
+    <string name="user_exists">Username already exists</string>
 
     <string name="logout">Logout</string>
 
@@ -39,4 +49,9 @@
 
     <string name="filler_text">FILLER TEXT; SHOULD NOT BE HERE</string>
     <string name="filler_date">Abcdefghi 99</string>
+
+    <string name="user_object_key">USER OBJECT KEY</string>
+    <string name="user_name_key">USER NAME KEY</string>
+    <string name="preference_file_key">com.dragynslayr.chron.PREFERENCE_FILE_KEY</string>
+    <string name="user_token_key">USER TOKEN KEY</string>
 </resources>

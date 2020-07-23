@@ -3,56 +3,67 @@ package com.dragynslayr.chron.activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.dragynslayr.chron.R
-import com.dragynslayr.chron.helper.CHANNEL_ID
-import com.dragynslayr.chron.helper.enableNightMode
-import com.firebase.ui.auth.AuthUI
-import com.google.firebase.auth.ktx.auth
+import com.dragynslayr.chron.data.User
+import com.dragynslayr.chron.helper.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
 
 class SplashActivity : AppCompatActivity() {
+
+    private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableNightMode()
 
+        database = Firebase.database.reference
+
         createNotificationChannel()
 
-        if (Firebase.auth.currentUser == null) {
-            showLogin()
+        if (savedInstanceState == null) {
+            checkForToken()
+        }
+    }
+
+    private fun checkForToken() {
+        val sharedPreferences =
+            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        val userToken = sharedPreferences.getString(getString(R.string.user_token_key), null)
+        if (userToken != null) {
+            val split = userToken.split(",")
+            verifyToken(split[0], split[1])
         } else {
-            startMain()
+            startLogin()
         }
     }
 
-    private fun showLogin() {
-        val providers = arrayListOf(AuthUI.IdpConfig.EmailBuilder().build())
-        val loginIntent =
-            AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers)
-                .setLogo(R.drawable.ic_chron).setTheme(R.style.Theme_MyApp)
-                .build()
+    private fun verifyToken(username: String, password: String) {
+        database.child(DB_USERS).child(username)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onCancelled(p0: DatabaseError) {}
 
-        startActivityForResult(loginIntent, RC_SIGN_IN)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == RC_SIGN_IN && resultCode == RESULT_OK) {
-            startMain()
-        }
-    }
-
-    private fun startMain() {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        startActivity(intent)
-        finish()
+                override fun onDataChange(p0: DataSnapshot) {
+                    if (p0.exists()) {
+                        val user = p0.getValue<User>()
+                        if (user != null) {
+                            if (user.password == password) {
+                                startMain(user)
+                                return
+                            }
+                        }
+                    }
+                    startLogin()
+                }
+            })
     }
 
     private fun createNotificationChannel() {
@@ -67,9 +78,5 @@ class SplashActivity : AppCompatActivity() {
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
-    }
-
-    companion object {
-        private const val RC_SIGN_IN = 1
     }
 }

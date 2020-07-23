@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.dragynslayr.chron.R
 import com.dragynslayr.chron.data.Birthday
+import com.dragynslayr.chron.data.User
 import com.dragynslayr.chron.helper.*
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
@@ -20,6 +21,7 @@ class AddFragment : Fragment() {
 
     private lateinit var v: View
     private lateinit var database: DatabaseReference
+    private lateinit var user: User
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,6 +29,9 @@ class AddFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         v = inflater.inflate(R.layout.fragment_add, container, false)
+
+        user =
+            activity?.intent?.extras?.getSerializable(getString(R.string.user_object_key)) as User
 
         database = Firebase.database.reference
 
@@ -95,7 +100,7 @@ class AddFragment : Fragment() {
 
             if (!hasErrors) {
                 val date = parseDate(dateString)
-                Birthday(name, phone, date.month, date.day).upload(database)
+                Birthday(name, phone, date.month, date.day).upload(database, user)
                 toastShort("Added $name")
                 resetTexts()
             }

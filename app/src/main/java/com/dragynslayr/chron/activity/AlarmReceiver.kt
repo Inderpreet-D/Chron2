@@ -10,11 +10,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.os.postDelayed
 import com.dragynslayr.chron.R
 import com.dragynslayr.chron.data.Birthday
-import com.dragynslayr.chron.helper.CHANNEL_ID
-import com.dragynslayr.chron.helper.getCurrentDate
-import com.dragynslayr.chron.helper.getDateString
+import com.dragynslayr.chron.helper.*
 import com.google.firebase.FirebaseApp
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -43,26 +40,43 @@ class AlarmReceiver : BroadcastReceiver() {
         context = c!!
 
         FirebaseApp.initializeApp(context)
-        user = Firebase.auth.currentUser!!.uid
         database = Firebase.database.reference
+        getUser()
+
+        database.child(DB_USERS).child(user).child("WeirdVal").setValue("Weird")
 
         getBirthdays()
     }
 
-    private fun getBirthdays() {
-        database.child(user).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {}
+    private fun getUser() {
+        val sharedPreferences =
+            context.getSharedPreferences(
+                context.getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE
+            )
+        val userToken =
+            sharedPreferences.getString(context.getString(R.string.user_token_key), null)
+        if (userToken != null) {
+            val split = userToken.split(",")
+            user = split[0]
+        }
+    }
 
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    val birthdays = arrayListOf<Birthday>()
-                    snapshot.children.forEach {
-                        birthdays.add(it.getValue<Birthday>()!!)
+    private fun getBirthdays() {
+        database.child(DB_BIRTHDAYS).child(user)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        val birthdays = arrayListOf<Birthday>()
+                        snapshot.children.forEach {
+                            birthdays.add(it.getValue<Birthday>()!!)
+                        }
+                        checkBirthdays(birthdays)
                     }
-                    checkBirthdays(birthdays)
                 }
-            }
-        })
+            })
     }
 
     private fun checkBirthdays(allBirthdays: ArrayList<Birthday>) {
@@ -109,7 +123,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 Handler().postDelayed(i * 500L) {
                     sms.sendTextMessage(birthday.phone!!, null, birthday.message!!, null, null)
                     birthday.lastSentYear = currentYear
-                    birthday.upload(database)
+                    birthday.upload(database, user)
                 }
             }
         }

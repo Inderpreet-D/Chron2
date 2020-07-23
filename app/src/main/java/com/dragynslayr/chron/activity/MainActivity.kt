@@ -21,14 +21,13 @@ import androidx.fragment.app.add
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import com.dragynslayr.chron.R
+import com.dragynslayr.chron.data.User
 import com.dragynslayr.chron.fragment.AddFragment
 import com.dragynslayr.chron.fragment.ViewFragment
 import com.dragynslayr.chron.helper.enableNightMode
 import com.dragynslayr.chron.helper.spaceButtons
 import com.dragynslayr.chron.helper.toastLong
 import com.google.android.material.navigation.NavigationView
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
@@ -36,6 +35,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private lateinit var drawer: DrawerLayout
     private lateinit var toggle: ActionBarDrawerToggle
+    private lateinit var user: User
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +63,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 add<ViewFragment>(R.id.content_frame, null, intent.extras)
             }
         }
+
+        user = intent.extras?.getSerializable(getString(R.string.user_object_key)) as User
+        nav_view.menu.getItem(0).title = user.username!!
 
         checkSMSPermission()
         scheduleAlarm()
@@ -152,17 +155,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun logout() {
-        Firebase.auth.signOut()
-        toastLong("Successfully logged out")
-        startSplash()
-    }
-
-    private fun startSplash() {
-        val intent = Intent(this, SplashActivity::class.java).apply {
+        clearToken()
+        val intent = Intent(applicationContext, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
+        toastLong("Successfully logged out")
         startActivity(intent)
-        finish()
+    }
+
+    private fun clearToken() {
+        val sharedPreferences =
+            getSharedPreferences(getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            remove(getString(R.string.user_token_key))
+            commit()
+        }
     }
 
     private fun scheduleAlarm() {
@@ -178,7 +185,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
 
         manager.setRepeating(
-            AlarmManager.RTC_WAKEUP,
+            AlarmManager.RTC,
             c.timeInMillis,
             AlarmManager.INTERVAL_DAY,
             alarmIntent

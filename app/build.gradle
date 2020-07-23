@@ -4,6 +4,14 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.google.gms.google-services'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('D:\\Dropbox\\keystore.jks')
+            storePassword '76S5R*0fcM^wOwc0&H0MTLUk#mPN3y9wxay2qvdDMr5Dobr1&b'
+            keyAlias = 'upload'
+            keyPassword '9L*@tr0DD^UG&HdXBtMaxTZ7n9&s&&dGV1YEca&6EiSD*kawAG'
+        }
+    }
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
 
@@ -22,6 +30,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            minifyEnabled false
         }
     }
 
@@ -51,10 +63,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.material:material:1.1.0'
-    implementation 'com.google.firebase:firebase-analytics:17.4.3'
-    implementation 'com.firebaseui:firebase-ui-auth:6.2.0'
-    implementation 'com.google.firebase:firebase-auth-ktx:19.3.1'
-    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.google.firebase:firebase-analytics:17.4.4'
+    implementation 'androidx.multidex:multidex:2.0.1'
 
     def nav_version = "2.3.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"

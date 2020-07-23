@@ -13,8 +13,8 @@ import com.dragynslayr.chron.R
 import com.dragynslayr.chron.data.Birthday
 import com.dragynslayr.chron.data.BirthdayComparator
 import com.dragynslayr.chron.data.BirthdayListAdapter
+import com.dragynslayr.chron.data.User
 import com.dragynslayr.chron.helper.*
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -30,6 +30,7 @@ class ViewFragment : Fragment() {
     private lateinit var database: DatabaseReference
     private lateinit var birthdays: ArrayList<Birthday>
     private lateinit var adapter: BirthdayListAdapter
+    private lateinit var user: User
     private val comparator = BirthdayComparator()
 
     override fun onCreateView(
@@ -38,6 +39,9 @@ class ViewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val v = inflater.inflate(R.layout.fragment_view, container, false)
+
+        user =
+            activity?.intent?.extras?.getSerializable(getString(R.string.user_object_key)) as User
 
         database = Firebase.database.reference
 
@@ -76,7 +80,7 @@ class ViewFragment : Fragment() {
                     val id = birthday.id!!
                     val newBirthday = Birthday(name, phone, month, day, message, id)
                     if (!birthday.sameAs(newBirthday)) {
-                        newBirthday.upload(database)
+                        newBirthday.upload(database, user)
                         toastShort("Saved changes")
                     }
                 }
@@ -103,7 +107,7 @@ class ViewFragment : Fragment() {
             AlertDialog.Builder(requireContext())
                 .setTitle(getString(R.string.remove_title, birthday.name!!))
                 .setPositiveButton(R.string.delete_text) { _, _ ->
-                    birthday.delete(database)
+                    birthday.delete(database, user)
                     toastShort("Deleted ${birthday.name!!}")
                 }.setNegativeButton(R.string.cancel_text) { _, _ -> }.create()
         dialog.setOnShowListener {
@@ -114,30 +118,30 @@ class ViewFragment : Fragment() {
     }
 
     private fun setupUpdates(recycler: RecyclerView) {
-        val user = Firebase.auth.currentUser!!.uid
-        database.child(user).addValueEventListener(object : ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {}
+        database.child(DB_BIRTHDAYS).child(user.username!!)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onCancelled(error: DatabaseError) {}
 
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val size = birthdays.size
-                birthdays.clear()
-                adapter.notifyItemRangeRemoved(0, size)
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val size = birthdays.size
+                    birthdays.clear()
+                    adapter.notifyItemRangeRemoved(0, size)
 
-                if (snapshot.exists()) {
-                    val temp = arrayListOf<Birthday>()
-                    snapshot.children.forEach {
-                        temp.add(it.getValue<Birthday>()!!)
+                    if (snapshot.exists()) {
+                        val temp = arrayListOf<Birthday>()
+                        snapshot.children.forEach {
+                            temp.add(it.getValue<Birthday>()!!)
+                        }
+
+                        val lists = splitListByDate(temp.sortedWith(comparator))
+                        birthdays.addAll(lists.first)
+                        birthdays.addAll(lists.second)
+
+                        adapter.notifyItemRangeInserted(0, birthdays.size)
+                        recycler.scrollToPosition(0)
                     }
-
-                    val lists = splitListByDate(temp.sortedWith(comparator))
-                    birthdays.addAll(lists.first)
-                    birthdays.addAll(lists.second)
-
-                    adapter.notifyItemRangeInserted(0, birthdays.size)
-                    recycler.scrollToPosition(0)
                 }
-            }
-        })
+            })
     }
 
     private fun splitListByDate(list: List<Birthday>): Pair<List<Birthday>, List<Birthday>> {

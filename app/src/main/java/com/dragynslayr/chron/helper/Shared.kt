@@ -9,6 +9,9 @@ import java.util.*
 const val APP_TAG = "CHRON-APP"
 const val CHANNEL_ID = "ChronNotify"
 
+const val DB_USERS = "users"
+const val DB_BIRTHDAYS = "birthdays"
+
 private val MONTHS = arrayOf(
     "January",
     "February",
