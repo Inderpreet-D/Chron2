@@ -26,9 +26,7 @@
         <activity android:name=".activity.LoginActivity" />
         <activity android:name=".activity.MainActivity" />
 
-        <receiver
-            android:name=".activity.AlarmReceiver"
-            android:process=":remote" />
+        <receiver android:name=".activity.AlarmReceiver" />
     </application>
 
 </manifest>

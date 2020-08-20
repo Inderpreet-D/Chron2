@@ -1,9 +1,7 @@
 package com.dragynslayr.chron.activity
 
 import android.Manifest
-import android.app.AlarmManager
 import android.app.AlertDialog
-import android.app.PendingIntent
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -29,7 +27,6 @@ import com.dragynslayr.chron.helper.spaceButtons
 import com.dragynslayr.chron.helper.toastLong
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -68,7 +65,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.menu.getItem(0).title = user.username!!
 
         checkSMSPermission()
-        scheduleAlarm()
+        AlarmReceiver.startAlarm(applicationContext)
     }
 
     private fun checkSMSPermission() {
@@ -170,26 +167,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             remove(getString(R.string.user_token_key))
             commit()
         }
-    }
-
-    private fun scheduleAlarm() {
-        val c = Calendar.getInstance()
-        c.time = Date()
-        c.set(Calendar.HOUR_OF_DAY, 0)
-        c.set(Calendar.MINUTE, 1)
-        c.set(Calendar.SECOND, 0)
-        c.set(Calendar.MILLISECOND, 0)
-
-        val manager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, AlarmReceiver::class.java)
-        val alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
-
-        manager.setRepeating(
-            AlarmManager.RTC,
-            c.timeInMillis,
-            AlarmManager.INTERVAL_DAY,
-            alarmIntent
-        )
     }
 
     companion object {

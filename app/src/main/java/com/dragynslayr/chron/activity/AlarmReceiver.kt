@@ -1,5 +1,8 @@
 package com.dragynslayr.chron.activity
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_CANCEL_CURRENT
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -19,6 +22,11 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.database.ktx.getValue
 import com.google.firebase.ktx.Firebase
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 class AlarmReceiver : BroadcastReceiver() {
@@ -29,23 +37,25 @@ class AlarmReceiver : BroadcastReceiver() {
     private lateinit var user: String
 
 
-    override fun onReceive(c: Context?, i: Intent?) {
-        calendar = Calendar.getInstance()
-        calendar.time = Date()
+    override fun onReceive(c: Context, i: Intent) {
+        try {
+            calendar = Calendar.getInstance()
+            calendar.time = Date()
 
-        if (calendar.get(Calendar.HOUR_OF_DAY) != 0) {
-            return
+            context = c
+
+            FirebaseApp.initializeApp(context)
+            database = Firebase.database.reference
+            getUser()
+
+            database.child(DB_USERS).child(user).child("WeirdVal").setValue("Weird")
+
+            getBirthdays()
+        } catch (e: Exception) {
+            e.toString().log()
+        } finally {
+            startAlarm(c)
         }
-
-        context = c!!
-
-        FirebaseApp.initializeApp(context)
-        database = Firebase.database.reference
-        getUser()
-
-        database.child(DB_USERS).child(user).child("WeirdVal").setValue("Weird")
-
-        getBirthdays()
     }
 
     private fun getUser() {
@@ -131,5 +141,31 @@ class AlarmReceiver : BroadcastReceiver() {
 
     companion object {
         private var NOTIFICATION_ID = 0
+        private const val REQUEST_TIMER = 1
+
+        fun startAlarm(context: Context) {
+            val intent = Intent(context, this::class.java)
+            val pendingIntent =
+                PendingIntent.getBroadcast(context, REQUEST_TIMER, intent, FLAG_CANCEL_CURRENT)
+            val alarm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+            val alarmTime = LocalTime.of(0, 1)
+            var now = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES)
+            val nowTime = now.toLocalTime()
+
+            if (nowTime == alarmTime || nowTime.isAfter(alarmTime)) {
+                now = now.plusDays(1)
+            }
+            now = now.withHour(alarmTime.hour).withMinute(alarmTime.minute)
+
+            val utc = now.atZone(ZoneId.systemDefault()).withZoneSameInstant(ZoneOffset.UTC)
+                .toLocalDateTime()
+            val startMillis = utc.atZone(ZoneOffset.UTC)!!.toInstant()!!.toEpochMilli()
+
+            "Alarm will trigger in ${(startMillis - System.currentTimeMillis()) / 1000}s".log()
+
+            val windowMillis = 15L * 60L * 1000L
+            alarm.setWindow(AlarmManager.RTC_WAKEUP, startMillis, windowMillis, pendingIntent)
+        }
     }
 }
